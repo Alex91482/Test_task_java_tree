@@ -12,10 +12,12 @@ public class TestMain {
 
     private ArrayBlockingQueue<String> myBlockingQueue = new ArrayBlockingQueue<>(100, true);
     private int counter = 0;
-    /*private Flux<String> myFlux = Flux
+
+    private Flux<String> myFlux = Flux
             .fromIterable(myBlockingQueue)
-            .delayElements(Duration.ofSeconds(1)); //имитация задержки
-    */
+            .delayElements(Duration.ofSeconds(1)) //имитация задержки на приготовление кофе
+            ;
+
     private Flux<Object> myFlux1 = Flux.generate((sink -> {
         String element = myBlockingQueue.poll();
         if (element == null) {
@@ -24,13 +26,20 @@ public class TestMain {
             sink.next(element);
         }
     })
-    ).delayElements(Duration.ofSeconds(3));
+    ).delayElements(Duration.ofSeconds(2));
+
+    private Flux<Object> myFlux2 = Flux.create(sink -> {
+        myBlockingQueue.forEach(sink::next);
+        sink.complete();
+    }
+    ).delayElements(Duration.ofSeconds(2));
+
 
     public static void main(String...args) throws InterruptedException {
         System.out.println("Start program");
 
         TestMain testMain = new TestMain();
-        testMain.startThreadNoStatic(4); //создаем 4 потока
+        testMain.startThreadNoStatic(6); //создаем 4 потока
         Thread.sleep(20000); //если не заблокировать основной поток то ни чего не успеет произойти
 
         System.out.println("End program");
@@ -42,11 +51,17 @@ public class TestMain {
         myBlockingQueue.add(
                 ">> Queue: " + LocalTime.now().toString() + ", counter: " + counter + ", thread: " + str
         );
-        myFlux1.subscribe(
+        /*myFlux1.subscribe(
                 System.out::println,
                 System.out::println,
                 () -> System.out.println("To End " + str)
+        );*/
+        myFlux.subscribe(
+                System.out::println,
+                System.out::println,
+                () -> myBlockingQueue.poll()
         );
+        //вместо сообщения о завершении должно извлекатся событие из очереди
     }
 
     private class MyThread extends Thread{
@@ -57,12 +72,37 @@ public class TestMain {
         }
     }
 
-    private void startThreadNoStatic(int x){
+    private void startThreadNoStatic(int x) throws InterruptedException {
         //запускаем x потоков
         for(int i = 0; i < x; i++){
             MyThread myThread = new MyThread();
             myThread.start();
+            if (i == 1 | i == 3)
+                //после создания второго потока приостанавливаем
+                Thread.sleep(3000);
         }
+    }
+
+    private void testAddFlux4(String str){
+        counter++;
+        System.out.println("Start a count " + counter + " " + str);
+        myBlockingQueue.add(
+                ">> Queue: " + LocalTime.now().toString() + ", counter: " + counter + ", thread: " + str
+        );
+        Flux.generate((sink -> {
+                    String element = myBlockingQueue.poll();
+                    if (element == null) {
+                        sink.complete();
+                    } else {
+                        sink.next(element);
+                    }
+                })
+        ).delayElements(Duration.ofSeconds(1))
+                .subscribe(
+                    System.out::println,
+                    System.out::println,
+                    () -> System.out.println("To End " + str)
+        );
     }
 
 
@@ -98,5 +138,9 @@ public class TestMain {
                             subscription.cancel();
                         }
                 );
+    }
+
+    private void testFlux5(){
+        //Flux.
     }
 }
