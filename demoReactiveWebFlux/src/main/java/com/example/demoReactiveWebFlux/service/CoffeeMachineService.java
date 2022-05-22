@@ -41,19 +41,7 @@ public class CoffeeMachineService {
             .delayElements(Duration.ofSeconds(1))   //элементы перебераются с интервалом в 1 секунду
             ;
 
-
-    public Flux<String> testAddFlux3(String str){
-        // эмитация добавления заказа в очередь
-        //возвращает поток с заказами
-        counter++;
-        System.out.println("Start a count " + counter + " " + str);
-        myBlockingQueue.add(
-                ">> Queue: " + LocalTime.now().toString() + ", counter: " + counter + ", thread: " + str
-        );
-        return myFlux;
-        //вместо сообщения о завершении должно извлекатся событие из очереди
-    }
-
+    
     public void blockingQueuePool(){
         //поскольку при каждом вызове в очередь добавляется один заказ
         //то после извлечении заказа он должен быть удален из очереди
@@ -62,6 +50,11 @@ public class CoffeeMachineService {
 
     public Flux<String> test1(){
         //если заказы сделанны одновременно то пользователи оба увидят цепочку из двух заказов что есть ошибка
+        counter++;
+        System.out.println("Start a count " + counter + " ");
+        myBlockingQueue.add(
+                ">> Queue: " + LocalTime.now().toString() + ", counter: " + counter
+        );
         return Flux.fromIterable(myBlockingQueue).delayElements(Duration.ofSeconds(1)).doOnComplete(this::blockingQueuePool);
     }
 }
