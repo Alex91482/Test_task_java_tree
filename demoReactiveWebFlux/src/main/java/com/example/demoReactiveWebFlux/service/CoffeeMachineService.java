@@ -34,27 +34,17 @@ public class CoffeeMachineService {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private final ArrayBlockingQueue<String> myBlockingQueue = new ArrayBlockingQueue<>(100, true);
-    private int counter = 0;
-
-    private final Flux<String> myFlux = Flux
-            .fromIterable(myBlockingQueue)          //каждый пользователь получит копию элементов из очереди
-            .delayElements(Duration.ofSeconds(1))   //элементы перебераются с интервалом в 1 секунду
-            ;
-
-    
-    public void blockingQueuePool(){
-        //поскольку при каждом вызове в очередь добавляется один заказ
-        //то после извлечении заказа он должен быть удален из очереди
-        myBlockingQueue.poll();
-    }
 
     public Flux<String> test1(){
         //если заказы сделанны одновременно то пользователи оба увидят цепочку из двух заказов что есть ошибка
-        counter++;
-        System.out.println("Start a count " + counter + " ");
-        myBlockingQueue.add(
-                ">> Queue: " + LocalTime.now().toString() + ", counter: " + counter
-        );
-        return Flux.fromIterable(myBlockingQueue).delayElements(Duration.ofSeconds(1)).doOnComplete(this::blockingQueuePool);
+        //и вообще это все тянет на состояние гонки
+        System.out.println("Start ");
+        myBlockingQueue.add(">> Queue: " + LocalTime.now().toString());
+
+        //поскольку при каждом вызове в очередь добавляется один заказ
+        //то после извлечении заказа он должен быть удален из очереди
+        return Flux.fromIterable(myBlockingQueue)
+                .delayElements(Duration.ofSeconds(1))
+                .doOnComplete(myBlockingQueue::poll);
     }
 }

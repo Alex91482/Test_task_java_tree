@@ -1,11 +1,13 @@
 package com.example.demoReactiveWebFlux;
 
-import org.springframework.http.codec.ServerSentEvent;
+import org.junit.jupiter.api.Test;
+import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestMain2 {
 
@@ -58,6 +60,39 @@ public class TestMain2 {
                 //после создания второго и четвертого потока приостанавливаем
                 Thread.sleep(3000);
         }
+    }
+
+    @Test
+    public void test() throws InterruptedException {
+
+        AtomicInteger size1 = new AtomicInteger();
+        AtomicInteger size2 = new AtomicInteger();
+
+        myBlockingQueue.add(">> Queue: " + LocalTime.now().toString());
+        Flux.fromIterable(myBlockingQueue)
+                .delayElements(Duration.ofSeconds(1))
+                .collectList()
+                .doOnSuccess(data -> {
+                    size1.set(data.size());
+                    myBlockingQueue.poll();
+                })
+                .subscribe();
+
+
+        Thread.sleep(500);
+        myBlockingQueue.add(">> Queue: " + LocalTime.now().toString());
+        Flux.fromIterable(myBlockingQueue)
+                .delayElements(Duration.ofSeconds(1))
+                .collectList()
+                .doOnSuccess(data -> {
+                    size2.set(data.size());
+                    myBlockingQueue.poll();
+                })
+                .subscribe();
+
+        Thread.sleep(3000);
+        Assert.isTrue(size1.get() < size2.get(), "Size 1: " + size1.get() + " < Size 2: " + size2.get());
+        Assert.isTrue(myBlockingQueue.size() == 0,  "Queue size = " + myBlockingQueue.size() + ". Queue size should be 0");
     }
 
 }
