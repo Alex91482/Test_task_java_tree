@@ -1,5 +1,6 @@
 package com.example.demoReactiveWebFlux;
 
+import com.example.demoReactiveWebFlux.service.CoffeeMachineService;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
@@ -93,6 +94,27 @@ public class TestMain2 {
         Thread.sleep(3000);
         Assert.isTrue(size1.get() < size2.get(), "Size 1: " + size1.get() + " < Size 2: " + size2.get());
         Assert.isTrue(myBlockingQueue.size() == 0,  "Queue size = " + myBlockingQueue.size() + ". Queue size should be 0");
+    }
+
+    @Test
+    public void testTwo() throws InterruptedException {
+        //в этом тесте можно увидеть что выдерживается время извлечения элементов из очереди
+        //второй подписчик получит два элемента из очереди
+        //так же проверяем что после отписки в очереде не осталось элементов
+
+        CoffeeMachineService coffeeMachineService = new CoffeeMachineService(null);
+
+        AtomicInteger size1 = new AtomicInteger();
+        AtomicInteger size2 = new AtomicInteger();
+
+        coffeeMachineService.test1().collectList().doOnSuccess(data -> size1.set(data.size())).subscribe();
+        Thread.sleep(500);
+        coffeeMachineService.test1().collectList().doOnSuccess(data -> size2.set(data.size())).subscribe();
+
+        Thread.sleep(3000);
+        Assert.isTrue(size1.get() < size2.get(), "Size 1: " + size1.get() + " < Size 2: " + size2.get());
+        Assert.isTrue(coffeeMachineService.getSizeQueue() == 0,
+                "Queue size = " + coffeeMachineService.getSizeQueue() + ". Queue size should be 0");
     }
 
 }

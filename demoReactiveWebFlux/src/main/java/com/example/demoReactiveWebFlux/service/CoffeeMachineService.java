@@ -20,9 +20,6 @@ public class CoffeeMachineService {
         this.savedEventDAO = savedEventDAO;
     }
 
-    //создаем "горячего" издателя
-    //public Flux<SavedEvent> queueCoffee= Flux.fromStream(() -> ).share();
-
     public Mono<SavedEvent> getLatestRecord(){
         return savedEventDAO.getTheLatestEntry();
     }
@@ -33,6 +30,7 @@ public class CoffeeMachineService {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    //размер очереди ограничен 100 записями, далее они будут перезаписыватся
     private final ArrayBlockingQueue<String> myBlockingQueue = new ArrayBlockingQueue<>(100, true);
 
     public Flux<String> test1(){
@@ -46,5 +44,9 @@ public class CoffeeMachineService {
         return Flux.fromIterable(myBlockingQueue)
                 .delayElements(Duration.ofSeconds(1))
                 .doOnComplete(myBlockingQueue::poll);
+    }
+
+    public int getSizeQueue(){
+        return myBlockingQueue.size();
     }
 }
