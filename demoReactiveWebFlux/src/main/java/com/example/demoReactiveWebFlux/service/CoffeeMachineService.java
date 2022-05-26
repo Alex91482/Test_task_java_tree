@@ -42,7 +42,7 @@ public class CoffeeMachineService {
         //поскольку при каждом вызове в очередь добавляется один заказ
         //то после извлечении заказа он должен быть удален из очереди
         return Flux.fromIterable(myBlockingQueue)
-                .delayElements(Duration.ofSeconds(1))
+                .delayElements(Duration.ofSeconds(15))
                 .doOnComplete(myBlockingQueue::poll);
     }
 

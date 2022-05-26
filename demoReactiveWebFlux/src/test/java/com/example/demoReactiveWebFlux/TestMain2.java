@@ -107,9 +107,19 @@ public class TestMain2 {
         AtomicInteger size1 = new AtomicInteger();
         AtomicInteger size2 = new AtomicInteger();
 
-        coffeeMachineService.test1().collectList().doOnSuccess(data -> size1.set(data.size())).subscribe();
+        //long m = System.currentTimeMillis();
+        //System.out.println((double) (System.currentTimeMillis() - m));
+        coffeeMachineService.test1()
+                .collectList()
+                .doOnSuccess(data -> size1.set(data.size()))
+                .subscribe();
+
         Thread.sleep(500);
-        coffeeMachineService.test1().collectList().doOnSuccess(data -> size2.set(data.size())).subscribe();
+
+        coffeeMachineService.test1()
+                .collectList()
+                .doOnSuccess(data -> size2.set(data.size()))
+                .subscribe();
 
         Thread.sleep(3000);
         Assert.isTrue(size1.get() < size2.get(), "Size 1: " + size1.get() + " < Size 2: " + size2.get());

@@ -19,8 +19,8 @@ import java.time.LocalTime;
 import java.util.List;
 
 
-@RestController
-//@RequestMapping("/rest")
+//@RestController
+@RequestMapping("/rest")
 public class Controller {
 
     private CoffeeMachineService coffeeMachineService;

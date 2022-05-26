@@ -13,7 +13,7 @@ import java.util.Date;
 
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
-@Component
+//@Component
 public class TimeHandler {
 
     public Mono<ServerResponse> sendTimePerSec(ServerRequest request){

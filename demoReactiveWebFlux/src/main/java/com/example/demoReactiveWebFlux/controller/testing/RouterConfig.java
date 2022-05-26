@@ -9,18 +9,18 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
-@Configuration
+//@Configuration
 public class RouterConfig {
 
     private TimeHandler timeHandler;
 
-    @Autowired
+    //@Autowired
     public RouterConfig(TimeHandler timeHandler) {
         this.timeHandler = timeHandler;
     }
 
 
-    @Bean
+    //@Bean
     public RouterFunction<ServerResponse> timeRouter(){
         return route(GET("/times"), timeHandler::sendTimePerSec);
     }
