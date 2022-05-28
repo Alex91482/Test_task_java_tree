@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2>Spring WebFlux + Thymeleaf</h2>
+    <table>
+        <thead></thead>
+        <tbody>
+            <!--<td th:utext = "${my_text}">...</td>-->
+
+            <tr th:each="str : ${strs}">
+                <td th:text = "${str}" >...</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
