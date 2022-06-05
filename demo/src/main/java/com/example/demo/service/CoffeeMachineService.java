@@ -14,10 +14,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 @Service
 public class CoffeeMachineService {
 
-    private SavedEventDAOImpl savedEventDAOimpl; //взаимодействие с бд
+    private SavedEventDAOImpl savedEventDAOImpl;
 
-    public CoffeeMachineService(SavedEventDAOImpl savedEventDAOimpl){
-        this.savedEventDAOimpl = savedEventDAOimpl;
+    public CoffeeMachineService(SavedEventDAOImpl savedEventDAOImpl){
+        this.savedEventDAOImpl = savedEventDAOImpl;
     }
 
     //размер очереди ограничен 100 записями, далее они будут перезаписыватся
@@ -40,15 +40,13 @@ public class CoffeeMachineService {
         return myBlockingQueue.size();
     }
 
-    public boolean areThereEnoughIngredients(){
-        //достаточно ли ингредиентов
-        //проверку делаем перед тем как вернуть поток
-        //и резервируем ингредиенты то же перед потоком
-
-        return true;
+    public Mono<SavedEvent> getLatestRecord(){
+        //получить последнее событие
+        return savedEventDAOImpl.getTheLatestEntry();
     }
 
-    public Mono<SavedEvent> getLastEvent(){
-        return savedEventDAOimpl.getTheLatestEntry();
+    public Mono<List<SavedEvent>> getByOccurredEvent(){
+        //получить все события "Coffee Machine start" используется прото для примера
+        return savedEventDAOImpl.findByOccurredName("Coffee Machine start").collectList();
     }
 }

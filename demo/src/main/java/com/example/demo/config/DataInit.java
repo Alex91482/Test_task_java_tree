@@ -2,12 +2,15 @@ package com.example.demo.config;
 
 
 import com.example.demo.dao.SavedEventDAOImpl;
+import com.example.demo.entity.SavedEvent;
 import com.example.demo.util.idgenerator.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 public class DataInit implements ApplicationRunner {
