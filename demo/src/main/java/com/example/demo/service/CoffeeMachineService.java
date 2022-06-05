@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.dao.SavedEventDAOImpl;
+import com.example.demo.entity.SavedEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -12,7 +14,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 @Service
 public class CoffeeMachineService {
 
+    private SavedEventDAOImpl savedEventDAOimpl; //взаимодействие с бд
 
+    public CoffeeMachineService(SavedEventDAOImpl savedEventDAOimpl){
+        this.savedEventDAOimpl = savedEventDAOimpl;
+    }
 
     //размер очереди ограничен 100 записями, далее они будут перезаписыватся
     private final ArrayBlockingQueue<String> myBlockingQueue = new ArrayBlockingQueue<>(100, true);
@@ -32,5 +38,17 @@ public class CoffeeMachineService {
 
     public int getSizeQueue(){
         return myBlockingQueue.size();
+    }
+
+    public boolean areThereEnoughIngredients(){
+        //достаточно ли ингредиентов
+        //проверку делаем перед тем как вернуть поток
+        //и резервируем ингредиенты то же перед потоком
+
+        return true;
+    }
+
+    public Mono<SavedEvent> getLastEvent(){
+        return savedEventDAOimpl.getTheLatestEntry();
     }
 }

@@ -9,8 +9,13 @@ import reactor.core.publisher.Mono;
 
 public interface SavedEventRepository extends ReactiveMongoRepository<SavedEvent, Long> {
 
-    @Query("{ 'eventTime': { \"$slice\" : -1 } }")
+    @Query("{ \"eventTime\" : { \"$slice\" : -1 } }")
     Mono<SavedEvent> getTheLatestEntry();               //получить последнюю запись из бд
+
+    @Query("{\"eventTime\" : - 1 }")
+    Mono<SavedEvent> gettttt();
+
+    Mono<SavedEvent> findSavedEventByOrderByEventTimeDesc();
 
     Flux<SavedEvent> findByOccurredEvent(String name);  //получить события по названию
 }
