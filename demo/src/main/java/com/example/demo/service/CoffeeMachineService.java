@@ -5,12 +5,16 @@ import com.example.demo.entity.SavedEvent;
 import com.example.demo.service.beverages.AbstractCoffeeBeverages;
 import com.example.demo.service.beverages.EnumBeverages;
 import org.springframework.stereotype.Service;
+import reactor.core.Disposable;
+import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.FutureTask;
 
 @Service
 public class CoffeeMachineService {
@@ -28,26 +32,22 @@ public class CoffeeMachineService {
 
     //размер очереди ограничен 100 записями, далее они будут перезаписыватся
     private final ArrayBlockingQueue<SavedEvent> myBlockingQueue = new ArrayBlockingQueue<>(100, true);
-    private final Flux<String> fx = Flux.fromIterable(myBlockingQueue)
-            //.concatMap(SavedEvent::getOccurredEvent)
+
+    Flux<String> fx = Flux.fromIterable(myBlockingQueue)
             .map(SavedEvent::getOccurredEvent)
-            .delayElements(Duration.ofSeconds(15))
+            .delayElements(Duration.ofSeconds(10))
             .doOnComplete(myBlockingQueue::poll);
 
-    public Flux<String> test1(SavedEvent savedEvent){
-        //если заказы сделанны одновременно то пользователи оба увидят цепочку из двух заказов что есть ошибка
-        //и вообще это все тянет на состояние гонки?
+    ConnectableFlux<String> cf = fx.publish(); //поток теперь разадется на всех один
+
+
+    public Flux<String> test1(SavedEvent savedEvent) {
 
         myBlockingQueue.add(savedEvent);
-        //myBlockingQueue.add(">> Performed: " + savedEvent.getOccurredEvent());
 
-        //поскольку при каждом вызове в очередь добавляется один заказ
-        //то после извлечении заказа он должен быть удален из очереди
-        /*return Flux.fromIterable(myBlockingQueue)
-                .delayElements(Duration.ofSeconds(15))
-                .map(SavedEvent::getOccurredEvent)
-                .doOnComplete(myBlockingQueue::poll);*/
-        return fx;
+        cf.connect(); //запускаем на всех один поток публикации
+        //добавить отписку при совпадении айди
+        return cf;
     }
 
     public int getSizeQueue(){
