@@ -1,9 +1,6 @@
 package com.example.demo.service.beverages;
 
 
-import com.example.demo.service.AbstractCoffeeBeverages;
-import com.example.demo.service.Beverages;
-
 public class Americano extends AbstractCoffeeBeverages implements Beverages {
 
     public Americano(){
@@ -13,6 +10,7 @@ public class Americano extends AbstractCoffeeBeverages implements Beverages {
 
     private final int waterConsumption = 120; // 120 мл воды
     private final int coffeeConsumption = 10; // 10 гр молотого кофе
+
 
     @Override
     public int getWaterConsumption(){

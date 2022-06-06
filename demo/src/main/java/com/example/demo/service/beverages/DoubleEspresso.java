@@ -1,9 +1,6 @@
 package com.example.demo.service.beverages;
 
 
-import com.example.demo.service.AbstractCoffeeBeverages;
-import com.example.demo.service.Beverages;
-
 public class DoubleEspresso extends AbstractCoffeeBeverages implements Beverages {
 
     public DoubleEspresso(){

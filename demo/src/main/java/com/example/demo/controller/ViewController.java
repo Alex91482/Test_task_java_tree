@@ -1,6 +1,9 @@
 package com.example.demo.controller;
 
+import com.example.demo.entity.SavedEvent;
 import com.example.demo.service.CoffeeMachineService;
+import com.example.demo.service.beverages.EnumBeverages;
+import com.example.demo.util.idgenerator.IdGenerator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.result.view.Rendering;
 import org.thymeleaf.spring5.context.webflux.ReactiveDataDriverContextVariable;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
 
 @Controller
 public class ViewController {
@@ -26,13 +31,37 @@ public class ViewController {
         return Mono.just(Rendering.view("index1").build());
     }
 
-    @GetMapping("/view_v1")
+    @GetMapping("/get-americano")
     public Mono<Rendering> getView(final Model model){
         //отправляем сообщения о приготовленных напитках
+        SavedEvent se = new SavedEvent().builder()
+                .id(new IdGenerator().getRandomId())
+                .occurredEvent(EnumBeverages.Americano.toString())
+                .eventTime(LocalDateTime.now())
+                .fillCoffeeTank(1000)
+                .fillTheWaterTank(1000)
+                .build();
         return Mono.just(
                 Rendering.view("index1")
                         .modelAttribute("strs",
-                                new ReactiveDataDriverContextVariable(coffeeMachineService.test1(), 1,1))
+                                new ReactiveDataDriverContextVariable(coffeeMachineService.test1(se), 1,1))
+                        .build());
+    }
+
+    @GetMapping("/get-espresso")
+    public Mono<Rendering> getView1(final Model model){
+        //отправляем сообщения о приготовленных напитках
+        SavedEvent se = new SavedEvent().builder()
+                .id(new IdGenerator().getRandomId())
+                .occurredEvent(EnumBeverages.Espresso.toString())
+                .eventTime(LocalDateTime.now())
+                .fillCoffeeTank(1000)
+                .fillTheWaterTank(1000)
+                .build();
+        return Mono.just(
+                Rendering.view("index1")
+                        .modelAttribute("strs",
+                                new ReactiveDataDriverContextVariable(coffeeMachineService.test1(se), 1,1))
                         .build());
     }
 }

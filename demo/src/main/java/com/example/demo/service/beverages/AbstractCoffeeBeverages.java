@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.beverages;
 
 public abstract class AbstractCoffeeBeverages {
 
@@ -12,4 +12,5 @@ public abstract class AbstractCoffeeBeverages {
     public int getCoffeeConsumption(){
         return coffeeConsumption;
     }
+
 }
