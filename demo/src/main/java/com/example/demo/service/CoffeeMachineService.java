@@ -9,6 +9,7 @@ import reactor.core.Disposable;
 import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
 import java.util.List;
@@ -33,21 +34,33 @@ public class CoffeeMachineService {
     //размер очереди ограничен 100 записями, далее они будут перезаписыватся
     private final ArrayBlockingQueue<SavedEvent> myBlockingQueue = new ArrayBlockingQueue<>(100, true);
 
-    Flux<String> fx = Flux.fromIterable(myBlockingQueue)
-            .map(SavedEvent::getOccurredEvent)
+    private Flux<SavedEvent> fx = Flux.fromIterable(myBlockingQueue)
             .delayElements(Duration.ofSeconds(10))
-            .doOnComplete(myBlockingQueue::poll);
+            /*.map(data ->{
+                myBlockingQueue.poll();
+                return data.getOccurredEvent();
+            })*/
+            .repeat(); //когда поток заканчивается подписка остается, уверен что это жуткий говнокод но пока идей нет
 
-    ConnectableFlux<String> cf = fx.publish(); //поток теперь разадется на всех один
+    ConnectableFlux<SavedEvent> cf = fx.publish(); //поток теперь разадется на всех один
 
 
     public Flux<String> test1(SavedEvent savedEvent) {
 
         myBlockingQueue.add(savedEvent);
-
         cf.connect(); //запускаем на всех один поток публикации
+
         //добавить отписку при совпадении айди
-        return cf;
+        return cf
+                .doOnNext(data -> {
+                    if(data.getId() == savedEvent.getId()){
+                        //как отписатся то???
+                    }
+                })
+                .map(data ->{
+            myBlockingQueue.poll();
+            return data.getOccurredEvent();
+        });
     }
 
     public int getSizeQueue(){

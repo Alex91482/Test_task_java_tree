@@ -1,10 +1,9 @@
-package com.example.demo.generator;
+package com.example.demo;
 
 import com.example.demo.entity.SavedEvent;
 
 import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.SynchronousSink;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

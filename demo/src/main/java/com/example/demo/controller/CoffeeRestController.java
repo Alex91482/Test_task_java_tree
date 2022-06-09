@@ -22,7 +22,7 @@ public class CoffeeRestController {
 
     @GetMapping("/test")
     public ResponseEntity<String> testMethod(){
-        return new ResponseEntity<>("test", HttpStatus.OK);
+        return new ResponseEntity<>(String.valueOf(coffeeMachineService.getSizeQueue()), HttpStatus.OK);
     }
 
     @GetMapping("/get-latest-entry")
