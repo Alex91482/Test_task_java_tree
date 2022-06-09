@@ -36,10 +36,10 @@ public class CoffeeMachineService {
 
     private Flux<SavedEvent> fx = Flux.fromIterable(myBlockingQueue)
             .delayElements(Duration.ofSeconds(10))
-            /*.map(data ->{
+            .map(data ->{
                 myBlockingQueue.poll();
-                return data.getOccurredEvent();
-            })*/
+                return data;
+            })
             .repeat(); //когда поток заканчивается подписка остается, уверен что это жуткий говнокод но пока идей нет
 
     ConnectableFlux<SavedEvent> cf = fx.publish(); //поток теперь разадется на всех один
@@ -55,12 +55,10 @@ public class CoffeeMachineService {
                 .doOnNext(data -> {
                     if(data.getId() == savedEvent.getId()){
                         //как отписатся то???
+                        System.out.println("Event " + data.getOccurredEvent());
                     }
                 })
-                .map(data ->{
-            myBlockingQueue.poll();
-            return data.getOccurredEvent();
-        });
+                .map(SavedEvent::getOccurredEvent);
     }
 
     public int getSizeQueue(){
