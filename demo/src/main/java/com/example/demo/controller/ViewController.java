@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.SavedEvent;
 import com.example.demo.service.CoffeeMachineService;
+import com.example.demo.service.CoffeeMachineServiceImpl;
 import com.example.demo.service.beverages.EnumBeverages;
 import com.example.demo.util.idgenerator.IdGenerator;
 import org.springframework.stereotype.Controller;
@@ -19,9 +20,11 @@ import java.time.LocalDateTime;
 public class ViewController {
 
     private CoffeeMachineService coffeeMachineService;
+    private CoffeeMachineServiceImpl coffeeMachineServiceImpl;
 
-    public ViewController(CoffeeMachineService coffeeMachineService){
+    public ViewController(CoffeeMachineService coffeeMachineService, CoffeeMachineServiceImpl coffeeMachineServiceImpl){
         this.coffeeMachineService = coffeeMachineService;
+        this.coffeeMachineServiceImpl = coffeeMachineServiceImpl;
     }
 
     @RequestMapping(value = "/index1", method = RequestMethod.GET)
@@ -62,6 +65,17 @@ public class ViewController {
                 Rendering.view("index1")
                         .modelAttribute("strs",
                                 new ReactiveDataDriverContextVariable(coffeeMachineService.test1(se), 1,1))
+                        .build());
+    }
+
+    @GetMapping("/get-doubleespresso")
+    public Mono<Rendering> getView2(final Model model){
+        //
+        return Mono.just(
+                Rendering.view("index1")
+                        .modelAttribute("strs",
+                                new ReactiveDataDriverContextVariable( coffeeMachineServiceImpl.getFlux(
+                                        EnumBeverages.DoubleEspresso), 1,1))
                         .build());
     }
 }

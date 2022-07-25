@@ -45,78 +45,13 @@ public class CoffeeMachineService {
     public Flux<String> test1(SavedEvent savedEvent) {
 
         AtomicBoolean flag = new AtomicBoolean(false);
-        /*Mono<String> n = new Mono<>() { //это штука должна бы работать как сигнал к отписке
-            @Override
-            public void subscribe(CoreSubscriber<? super String> coreSubscriber) {
-
-            }
-        };*/
 
         myBlockingQueue.add(savedEvent);
         cf.connect(); //запускаем на всех один поток публикации
         //добавить отписку при совпадении айди
 
-        //возможно стоит создать новый поток из этого потока и возвращать его и отписыватся как следствие от нового потока
-        /*return Flux.from(cf)
-                .takeUntilOther(n)
-                .doOnNext(data -> {
-                    if(data.getId() == savedEvent.getId()){
-                        //data.setOccurredEvent("Your order has been completed");
-                        //как отписатся то???
-                        System.out.println("Event " + data.getOccurredEvent());
-                        //n = Mono.just("f");
-                        stopVoid(n);
-                    }
-                })
-                .map(SavedEvent::getOccurredEvent);*/
-
-        return cf
-                .takeUntilOther(st(flag.get()))
-                .doOnNext(data -> {
-                    if(data.getId() == savedEvent.getId()){
-                        //data.setOccurredEvent("Your order has been completed");
-                        //как отписатся то???
-                        System.out.println("flag = " + flag.get());
-                        System.out.println("Event " + data.getOccurredEvent());
-                        flag.set(true);
-                        System.out.println("flag = " + flag.get());
-                    }
-                })
-                .map(SavedEvent::getOccurredEvent);
+        return cf.map(SavedEvent::getOccurredEvent);
     }
-
-    private Mono<String> st(boolean flag){
-        System.out.println("flag in st = " + flag);
-        //есть один подвох например что если остановка происходит только при получении следующего элемента
-        //если было заказанно только одно кофе то все подвиснет пока не будет заказанно следущее кофе
-        if(flag) {
-            System.out.println("Mono just");
-            return Mono.just("");
-        }else{
-            return new Mono<>() { //это штука должна бы работать как сигнал к отписке
-                @Override
-                public void subscribe(CoreSubscriber<? super String> coreSubscriber) {
-
-                }
-            }; //тут событие не должно пораждвтся
-        }
-    }
-
-   /* private void s(ConnectableFlux<SavedEvent> c){
-        //c. ;
-    }
-    private void stopVoid(Mono<String> mono){
-        System.out.println(">> Mono just");
-        mono = Mono.just("f");
-        //mono.just("");
-    }
-
-    private Mono<String> stop(Mono<String> n){
-        //n = Mono.just("f");
-        //cf.distinct() ;
-        //return Mono.just("f");
-        return n.just("");
-    }*/
 
     public int getSizeQueue(){
         return myBlockingQueue.size();
