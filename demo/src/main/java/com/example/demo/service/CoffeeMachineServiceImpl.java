@@ -10,6 +10,7 @@ import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -32,14 +33,29 @@ public class CoffeeMachineServiceImpl {
     //размер очереди ограничен 100 записями, далее они будут перезаписыватся
     private final ArrayBlockingQueue<SavedEvent> myBlockingQueue = new ArrayBlockingQueue<>(100, true);
 
-    private Flux<SavedEvent> myPublisher = Flux.from(event -> {
-        event.onNext(getEvent());
-        event.onComplete();
-    });
+    private Flux<SavedEvent> myPublisher = Flux.create(events -> {
+        try {
+
+            for (int i =0; i < 2; i++) {
+                if (!myBlockingQueue.isEmpty()) {
+                    events.next(myBlockingQueue.poll());
+                    i=0;
+                }
+                Thread.sleep(9000); //ожидаем событие столько же сколько у событий длится интервал
+            }
+            events.complete();
+
+        }catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+            }).delayElements(Duration.ofSeconds(10))
+            .map(data -> {
+                return (SavedEvent) data;
+            });
 
     private final ConnectableFlux<SavedEvent> bigBrother = myPublisher.publish(); //поток теперь разадается на всех один
 
-    private SavedEvent getEvent(){
+    /*private SavedEvent getEvent(){
         if(!myBlockingQueue.isEmpty()) {
             try {
                 Thread.sleep(7000);
@@ -55,11 +71,12 @@ public class CoffeeMachineServiceImpl {
                 .fillTheWaterTank(0)
                 .eventTime(LocalDateTime.now())
                 .build(); //событие ошибка
-    }
+    }*/
 
-    public Flux<String> getFlux(EnumBeverages typeBeverages) {
+    public Flux<String> getFlux(SavedEvent savedEvent) {
 
-        areThereEnoughCoffeeIngredients(typeBeverages);
+        //areThereEnoughCoffeeIngredients(typeBeverages);
+        myBlockingQueue.add(savedEvent);
         bigBrother.connect(); //запускаем на всех один поток публикации
         return bigBrother.map(SavedEvent::getOccurredEvent);
     }

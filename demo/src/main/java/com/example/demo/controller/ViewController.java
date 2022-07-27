@@ -71,11 +71,17 @@ public class ViewController {
     @GetMapping("/get-doubleespresso")
     public Mono<Rendering> getView2(final Model model){
         //
+        SavedEvent se = new SavedEvent().builder()
+                .id(new IdGenerator().getRandomId())
+                .occurredEvent(EnumBeverages.DoubleEspresso.toString())
+                .eventTime(LocalDateTime.now())
+                .fillCoffeeTank(1000)
+                .fillTheWaterTank(1000)
+                .build();
         return Mono.just(
                 Rendering.view("index1")
                         .modelAttribute("strs",
-                                new ReactiveDataDriverContextVariable( coffeeMachineServiceImpl.getFlux(
-                                        EnumBeverages.DoubleEspresso), 1,1))
+                                new ReactiveDataDriverContextVariable( coffeeMachineServiceImpl.getFlux(se), 1,1))
                         .build());
     }
 }

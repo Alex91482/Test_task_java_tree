@@ -3,13 +3,50 @@ package com.example.demo;
 import com.example.demo.entity.SavedEvent;
 import com.example.demo.genetor.classic.MyPublisher;
 import com.example.demo.genetor.classic.MySubscriber;
+import com.example.demo.genetor.reactor.MyProcessorImpl;
 import com.example.demo.util.idgenerator.IdGenerator;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class MyPublisherTest {
+
+    @Test
+    public void test4(){
+        try {
+            MyProcessorImpl myProcessor = new MyProcessorImpl();
+            Flux<String> flux = Flux.from(myProcessor)
+                    .delayElements(Duration.ofSeconds(2))
+                    .map(event -> {
+                        System.out.println(event.getOccurredEvent());
+                        return event.getOccurredEvent();
+                    });
+            //flux.subscribe();
+
+            myProcessor.addEventInQueue(new SavedEvent().builder()
+                    .id(1L)
+                    .occurredEvent("Coffee Machine start")
+                    .eventTime(LocalDateTime.now())
+                    .fillTheWaterTank(1000)
+                    .fillCoffeeTank(1000)
+                    .build());
+            myProcessor.addEventInQueue(new SavedEvent().builder()
+                    .id(1L)
+                    .occurredEvent("Coffee Machine start2")
+                    .eventTime(LocalDateTime.now())
+                    .fillTheWaterTank(1000)
+                    .fillCoffeeTank(1000)
+                    .build());
+            flux.subscribe(System.out::println);
+
+            Thread.sleep(10000);
+
+        }catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     public void test1(){ //работает
